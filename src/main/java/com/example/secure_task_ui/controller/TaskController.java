@@ -34,7 +34,11 @@ public class TaskController {
     // Show edit page for a specific task
     @GetMapping("/{id}/edit")
     public String editTask(@PathVariable("id") Long id, Model model) {
-        model.addAttribute("taskForm", repo.findById(id));
+        TaskEntity task = repo.findById(id);
+        if (task == null) {
+            return "redirect:/tasks";
+        }
+        model.addAttribute("taskForm", task);
         model.addAttribute("tasks", repo.findAll());
         return "tasks";
     }
@@ -44,6 +48,9 @@ public class TaskController {
     public String updateTask(@PathVariable("id") Long id,
                              @ModelAttribute("taskForm") TaskEntity formTask) {
         TaskEntity existing = repo.findById(id);
+        if (existing == null) {
+            return "redirect:/tasks";
+        }
         existing.setTitle(formTask.getTitle());
         existing.setDescription(formTask.getDescription());
         existing.setCompleted(formTask.isCompleted());
