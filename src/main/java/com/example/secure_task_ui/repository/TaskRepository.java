@@ -1,9 +1,10 @@
-package com.example.securetaskui.repository;
+package com.example.secure_task_ui.repository;
 
-import com.example.securetaskui.entity.TaskEntity;
+import com.example.secure_task_ui.entity.TaskEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,11 +20,10 @@ public class TaskRepository {
     }
 
     public TaskEntity findById(Long id) {
-        // TODO A: Use EntityManager to find a single TaskEntity by its primary key.
-        // Hint: Use em.find(TaskEntity.class, id).
-        return null;
+        return em.find(TaskEntity.class, id);
     }
 
+    @Transactional
     public TaskEntity save(TaskEntity task) {
         if (task.getId() == null) {
             em.persist(task);   // INSERT
@@ -33,8 +33,11 @@ public class TaskRepository {
         }
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        // TODO B: Delete a task by id.
-        // Hint: First find the entity, then call em.remove(entity) if it's not null.
+        TaskEntity entity = em.find(TaskEntity.class, id);
+        if (entity != null) {
+            em.remove(entity);
+        }
     }
 }

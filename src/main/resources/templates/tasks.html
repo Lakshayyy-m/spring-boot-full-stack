@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Task Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #f5f5f5; }
+        h1 { color: #333; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .logout-form { display: inline; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+        .logout-btn:hover { background: #c82333; }
+        .card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.3rem; font-weight: bold; color: #555; }
+        .form-group input[type="text"], .form-group textarea { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .form-group textarea { height: 60px; resize: vertical; }
+        .checkbox-group { display: flex; align-items: center; gap: 0.5rem; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0069d9; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; color: #333; }
+        .completed { text-decoration: line-through; color: #999; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-secondary { background: #6c757d; color: white; }
+        .actions form { display: inline; margin-right: 0.3rem; }
+        .empty-msg { text-align: center; color: #888; padding: 2rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Task Manager</h1>
+        <div>
+            <span sec:authentication="name">User</span> |
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Form (Create / Edit) -->
+    <div class="card">
+        <h2 th:text="${taskForm.id != null} ? 'Edit Task' : 'New Task'">New Task</h2>
+        <form th:action="${taskForm.id != null} ? @{/tasks/{id}/update(id=${taskForm.id})} : @{/tasks}"
+              th:object="${taskForm}" method="post">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" th:field="*{title}" required="required"/>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" required="required"></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="completed" th:field="*{completed}"/>
+                <label for="completed" style="margin-bottom:0;font-weight:normal;">Completed</label>
+            </div>
+            <button type="submit" class="btn btn-primary"
+                    th:text="${taskForm.id != null} ? 'Update' : 'Create'">Create</button>
+            <a th:if="${taskForm.id != null}" th:href="@{/tasks}" class="btn btn-secondary"
+               style="text-decoration:none;background:#6c757d;color:white;padding:0.5rem 1rem;border-radius:4px;">Cancel</a>
+        </form>
+    </div>
+
+    <!-- Task List -->
+    <div class="card">
+        <h2>Tasks</h2>
+        <div th:if="${#lists.isEmpty(tasks)}" class="empty-msg">
+            <p>No tasks yet. Create one above!</p>
+        </div>
+        <table th:unless="${#lists.isEmpty(tasks)}">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="task : ${tasks}">
+                <td th:classappend="${task.completed} ? 'completed'" th:text="${task.title}">Title</td>
+                <td th:classappend="${task.completed} ? 'completed'" th:text="${task.description}">Description</td>
+                <td>
+                    <span th:if="${task.completed}" class="badge badge-success">Done</span>
+                    <span th:unless="${task.completed}" class="badge badge-secondary">Pending</span>
+                </td>
+                <td class="actions">
+                    <a th:href="@{/tasks/{id}/edit(id=${task.id})}" class="btn btn-warning">Edit</a>
+                    <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post">
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Delete this task?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
