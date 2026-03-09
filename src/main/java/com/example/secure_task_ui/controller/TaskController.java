@@ -1,7 +1,7 @@
-package com.example.securetaskui.controller;
+package com.example.secure_task_ui.controller;
 
-import com.example.securetaskui.entity.TaskEntity;
-import com.example.securetaskui.repository.TaskRepository;
+import com.example.secure_task_ui.entity.TaskEntity;
+import com.example.secure_task_ui.repository.TaskRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,17 +39,29 @@ public class TaskController {
         // TODO C: Load the task by id from the repository and add it to the model.
         // Hint: Call repo.findById(id), then add it as "taskForm" so we can reuse the same form.
         // Also, add "tasks" to the model so the list is still visible.
+        TaskEntity task = repo.findById(id);
+        model.addAttribute("taskForm", task);
+        model.addAttribute("tasks", repo.findAll());
         return "tasks";
     }
 
     // Handle update of an existing task
     @PostMapping("/{id}/update")
-    public String updateTask(@PathVariable("id") Long id,
-                             @ModelAttribute("taskForm") TaskEntity formTask) {
+    public String updateTask(
+        @PathVariable("id") Long id,
+        @ModelAttribute("taskForm") TaskEntity formTask
+    ) {
         // TODO D:
         // 1. Load the existing task from the database using the id.
         // 2. Copy fields from formTask into the existing entity (title, description, completed).
         // 3. Save the existing entity using repo.save(...).
+        TaskEntity task = repo.findById(id);
+        if (task != null) {
+            task.setTitle(formTask.getTitle());
+            task.setDescription(formTask.getDescription());
+            task.setCompleted(formTask.isCompleted());
+            repo.save(task);
+        }
         return "redirect:/tasks";
     }
 
@@ -57,6 +69,7 @@ public class TaskController {
     @PostMapping("/{id}/delete")
     public String deleteTask(@PathVariable("id") Long id) {
         // TODO E: Call the repository method that deletes a task by id.
+        repo.deleteById(id);
         return "redirect:/tasks";
     }
 }

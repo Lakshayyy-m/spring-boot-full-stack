@@ -1,4 +1,4 @@
-package com.example.securetaskui.entity;
+package com.example.secure_task_ui.entity;
 
 import jakarta.persistence.*;
 
